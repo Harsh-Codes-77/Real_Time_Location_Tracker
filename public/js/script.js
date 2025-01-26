@@ -1,62 +1,39 @@
-// const socketio = io();
-
-// if(navigator.geolocation){
-//     navigator.geolocation.watchPosition((position) => {
-//         const {latitude, longitude} = position.coords;
-//         socketio.emit("send-location", {latitude, longitude});
-//     }, (error) => {
-//         console.error(error);
-//     },
-//     {
-//         enableHighAccuracy: true,
-//         timeout: 5000,
-//         maximumAge: 0,
-//     }
-//     );
-// } else {
-//     console.log("Geolocation is not supported by your browser.")
-// }
-
-// const map = L.map("map").setView([0, 0], 7);
-// L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-//     attribution: "Harsh-Codes-77"
-// }).addTo(map)
-
-// const markers = {};
-
-// socketio.on("receive-location", (data) => {
-//     const {id, latitude, longitude} = data;
-//     map.setView([latitude, longitude]);
-//     if(markers[id]){
-//         markers[id].setLatLng([latitude, longitude]);
-//     } else{
-//         markers[id] = L.marker([latitude, longitude]).addTo(map);
-//     }
-// });
-
-
 const socketio = io();
 
 const map = L.map("map").setView([0, 0], 16);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "© OpenStreetMap contributors"
+    attribution: "© Harsh-Codes-77"
 }).addTo(map);
 
 const markers = {};
+let isFirstUpdate = true;
 
 if (navigator.geolocation) {
     navigator.geolocation.watchPosition(
         (position) => {
-            const { latitude, longitude } = position.coords;
+            const { latitude, longitude, accuracy } = position.coords;
+            
+            console.log(`Latitude: ${latitude}, Longitude: ${longitude}, Accuracy: ${accuracy} meters`);
+
+            if (accuracy > 100) {
+                console.warn("Low accuracy, skipping update...");
+                return;
+            }
+
             socketio.emit("send-location", { latitude, longitude });
+
+            if (isFirstUpdate) {
+                map.setView([latitude, longitude], 16);
+                isFirstUpdate = false;
+            }
         },
         (error) => {
             console.error("Geolocation error:", error);
         },
         {
             enableHighAccuracy: true,
-            timeout: 2000,
-            maximumAge: 0,
+            timeout: 5000,
+            maximumAge: 0
         }
     );
 } else {
@@ -65,8 +42,6 @@ if (navigator.geolocation) {
 
 socketio.on("receive-location", (data) => {
     const { id, latitude, longitude } = data;
-
-    map.setView([latitude, longitude]);
 
     if (markers[id]) {
         markers[id].setLatLng([latitude, longitude]);
