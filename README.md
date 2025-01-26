@@ -19,4 +19,17 @@ Dependencies you need to install:
 
 3.     npm install socket.io
 
-Also you can use this localhost server your another devices by creating a link from **ngrok**
+Installation:
+
+Clone the repository:
+
+       git clone https://github.com/Harsh-Codes-77/Real_Time_Location_Tracker.git
+
+Open your browser and navigate to http://localhost:8080
+
+To make the service available on other devices, use **ngrok**:
+
+     ngrok http 3000
+
+**For inquiries, please contact Harsh-Codes-77**
+     
